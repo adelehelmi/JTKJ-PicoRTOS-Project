@@ -11,6 +11,7 @@
 #include "tkjhat/sdk.h"
 
 
+
 // Exercise 4. Include the libraries necessaries to use the usb-serial-debug, and tinyusb
 // Tehtävä 4 . Lisää usb-serial-debugin ja tinyusbin käyttämiseen tarvittavat kirjastot.
 
@@ -43,7 +44,7 @@ static void sensor_task(void *arg){
     // Tehtävä 2: Alusta valoisuusanturi. Etsi SDK-dokumentaatiosta sopiva funktio.
     // Exercise 2: Init the light sensor. Find in the SDK documentation the adequate function.
 
-    
+    init_veml6030();
    
     for(;;){
         

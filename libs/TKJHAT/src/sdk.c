@@ -560,12 +560,17 @@ uint32_t veml6030_read_light() {
     uint8_t txBuffer[1];
     uint8_t rxBuffer[2];
 
-    txBuffer [0] = VEML6030_ALS_REG
+    txBuffer [0] = VEML6030_ALS_REG;
+
+    
+    uint32_t luxVal_uncorrected = 0; 
 
     if(i2c_write_blocking(i2c_default, VEML6030_I2C_ADDR, txBuffer, 1, true) != PICO_ERROR_GENERIC) {
             if(i2c_read_blocking(i2c_default, VEML6030_I2C_ADDR, rxBuffer, 2, false) != PICO_ERROR_GENERIC) {
   
-    uint32_t luxVal_uncorrected = 0; 
+     luxVal_uncorrected = (((uint16_t)rxBuffer[1] << 8 ) + rxBuffer[0]) * 0.5376;
+
+
     if (luxVal_uncorrected>1000){
         // Polynomial is pulled from pg 10 of the datasheet. 
         // See https://github.com/sparkfun/SparkFun_Ambient_Light_Sensor_Arduino_Library/blob/efde0817bd6857863067bd1653a2cfafe6c68732/src/SparkFun_VEML6030_Ambient_Light_Sensor.cpp#L409
@@ -577,7 +582,6 @@ uint32_t veml6030_read_light() {
     }
     return  luxVal_uncorrected;
 }
-
 
 
 //This method might be utility method in the future.
