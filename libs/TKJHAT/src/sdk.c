@@ -532,7 +532,6 @@ void init_veml6030() {
 // Read light level from VEML6030
 // Ligt in LUX
 // Note: sampling time should be > IT -> in this case it has been 100ms by defintion. 
-uint32_t veml6030_read_light() {
 
    
 
@@ -557,31 +556,20 @@ uint32_t veml6030_read_light() {
     //            käyttäen VEML6030-sovellussuunnitteluasiakirjan sivun 5 tietoja:https://www.vishay.com/docs/84367/designingveml6030.pdf
     //            Lopuksi tallenna arvo muuttujaan luxVal_uncorrected.
 
-    uint8_t txBuffer[1];
-    uint8_t rxBuffer[2];
-
-    txBuffer [0] = VEML6030_ALS_REG;
-
-    
-    uint32_t luxVal_uncorrected = 0; 
-
-    if(i2c_write_blocking(i2c_default, VEML6030_I2C_ADDR, txBuffer, 1, true) != PICO_ERROR_GENERIC) {
-            if(i2c_read_blocking(i2c_default, VEML6030_I2C_ADDR, rxBuffer, 2, false) != PICO_ERROR_GENERIC) {
-  
-     luxVal_uncorrected = (((uint16_t)rxBuffer[1] << 8 ) + rxBuffer[0]) * 0.5376;
 
 
-    if (luxVal_uncorrected>1000){
+
+    // kommentoitu 22.10 riville 571 asti if (luxVal_uncorrected>1000){
         // Polynomial is pulled from pg 10 of the datasheet. 
         // See https://github.com/sparkfun/SparkFun_Ambient_Light_Sensor_Arduino_Library/blob/efde0817bd6857863067bd1653a2cfafe6c68732/src/SparkFun_VEML6030_Ambient_Light_Sensor.cpp#L409
-        uint32_t luxVal = (.00000000000060135 * (pow(luxVal_uncorrected, 4))) - 
-                            (.0000000093924 * (pow(luxVal_uncorrected, 3))) + 
-                            (.000081488 * (pow(luxVal_uncorrected,2))) + 
-                            (1.0023 * luxVal_uncorrected);
-        return luxVal;
-    }
-    return  luxVal_uncorrected;
-}
+       // uint32_t luxVal = (.00000000000060135 * (pow(luxVal_uncorrected, 4))) - 
+        //                    (.0000000093924 * (pow(luxVal_uncorrected, 3))) + 
+        //                    (.000081488 * (pow(luxVal_uncorrected,2))) + 
+         //                   (1.0023 * luxVal_uncorrected);
+       // return luxVal;
+   // }
+   // return  luxVal_uncorrected;
+
 
 
 //This method might be utility method in the future.
