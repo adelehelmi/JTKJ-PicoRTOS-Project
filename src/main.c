@@ -14,11 +14,18 @@
 #define DEFAULT_STACK_SIZE 2048
 #define CDC_ITF_TX      1               // Sarjaliikenteen liitäntäkanava
 
+//Raja-arvot kallistukselle
+
+#define X_POS_THRESHOLD 0.35f
+#define X_NEG_THRESHOLD -0.35f
+#define Z_POS_THRESHOLD 0.35f
+#define Z_NEG_THRESHOLD -0.35f
+
 // Tilakoneen määrittely
 enum state { WAITING=1};
 enum state programState = WAITING;
 
-// =============================================
+// ==============================================
 // SENSOR_TASK
 // =============================================
 static void sensor_task(void *arg){
@@ -27,15 +34,29 @@ static void sensor_task(void *arg){
     // Alustetaan IMU
     init_ICM42670();
 
-    // Käynnistetään mittaukset oletusarvoilla
-    ICM42670_start_with_default_values();
+    // Käynnistetään IMU:n kiihtyvyys ja gyroskooppi mittaukset. Valitaan sopivat parametrit.
+    ICM42670_startAccel(ICM42670_ACCEL_ODR_100HZ, ICM42670_ACCEL_FSR_4G);       // Valittiin 4G tarkkuus kiihtyvyydelle, ei liian tarkka eikä liian karkea tekoäly ehdotti arvoja.
+    ICM42670_startGyro(ICM42670_GYRO_ODR_100HZ, ICM42670_GYRO_FSR_500DPS);      // Valittin 500°/s, tarpeeksi tarkka mutta ei liian herkkä.Tekoäly ehdotti arvoja
+
 
     // Luodaan muuttujat datan lukemista varten
     float ax, ay, az, gx, gy, gz, t;
 
     for(;;){
         ICM42670_read_sensor_data(&ax, &ay, &az, &gx, &gy, &gz, &t);
-        printf("X-akseli: %.2f | Y-akseli: %.2f | Z-akseli: %.2f\n", ax, ay, az);
+
+        if (ax > X_POS_THRESHOLD) {
+            printf("Piste\n");
+        }
+        else if (ax < X_NEG_THRESHOLD) {
+            printf("Viiva\n");
+        }
+        else if (az > Z_POS_THRESHOLD) {
+            printf("Välilyönti\n");
+        }
+        else if (az < Z_NEG_THRESHOLD) {
+            printf("Lähetä\n");
+        }
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
@@ -55,6 +76,7 @@ static void print_task(void *arg){
 // ================================================
 // MAIN_FUNKTION TOIMINTA
 // ================================================
+
 
 int main() {
     stdio_init_all();       // Alustaa standarditulosteen
