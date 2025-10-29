@@ -805,7 +805,7 @@ int init_ICM42670() {
         printf("Address could not be found");
     }
     else 
-        printf ("Address: 0x%02X\n",address);
+        printf("Address: 0x%02X\n",address);
     // Step 1: Check WHO_AM_I
     uint8_t who = 0;
     if (icm_i2c_read_byte(ICM42670_REG_WHO_AM_I, &who) != 0) {
@@ -816,9 +816,9 @@ int init_ICM42670() {
     };   
 
     // Step 2: Configure INT1 pin - push-pull, active-low, pulsed
-    if(icm_i2c_write_byte(ICM42670_INT_CONFIG, ICM42670_INT1_CONFIG_VALUE) != 0){ 
+    /*if(icm_i2c_write_byte(ICM42670_INT_CONFIG, ICM42670_INT1_CONFIG_VALUE) != 0){ 
         return -4;
-    }
+    }*/
     // tiny guard delay after init writes
     sleep_us(200);
     
