@@ -14,14 +14,11 @@
 #define CDC_ITF_TX      1               // Sarjaliikenteen liitäntäkanava
 
 //Raja-arvot kallistukselle
-#define X_POS_THRESHOLD 0.35f
-#define X_NEG_THRESHOLD -0.35f
-#define Z_POS_THRESHOLD 0.35f
-#define Z_NEG_THRESHOLD -0.35f
+#define X_POS_THRESHOLD 0.7f
+#define X_NEG_THRESHOLD -0.7f
+#define Z_POS_THRESHOLD 0.7f
+#define Z_NEG_THRESHOLD -0.7f
 
-    // Tilakoneen määrittely
-    enum state { WAITING=1};
-    enum state programState = WAITING;
 
 // ==============================================
 // SENSOR_TASK
@@ -35,15 +32,11 @@ static void sensor_task(void *arg){
         return;
     }
 
-    // Käynnistetään IMU:n kiihtyvyys ja gyroskooppi mittaukset. MIttausnopeus 100 kertaa sekunnissa
-    // Valitaan sopivat parametrit.
-    //ICM42670_startAccel(ICM42670_ACCEL_ODR_100HZ, ICM42670_ACCEL_FSR_4G);       // Valittiin 4G tarkkuus kiihtyvyydelle, ei liian tarkka eikä liian karkea tekoäly ehdotti arvoja.
-    //ICM42670_startGyro(ICM42670_GYRO_ODR_100HZ, ICM42670_GYRO_FSR_500DPS);      // Valittin 500°/s, tarpeeksi tarkka mutta ei liian herkkä.Tekoäly ehdotti arvoja
+    // Käynnistetään IMU:n kiihtyvyys mittaus oletusarvoilla.
     ICM42670_start_with_default_values();
 
     // Luodaan muuttujat datan lukemista varten
     float ax, ay, az, gx, gy, gz, t;
-    sleep_ms(1000);
 
     // Pääsilmukka, joka lukee jatkuvasti IMU-anturin dataa
     // ja tulkitsee laitteen asennon akselien arvojen perusteella
@@ -52,8 +45,6 @@ static void sensor_task(void *arg){
         // Luetaan sensorin mittausdata: 
         // ax, ay, az = kiihtyvyydet (g) ja gx, gy, gz = kulmannopeudet (°/s), t = lämpötila
         ICM42670_read_sensor_data(&ax, &ay, &az, &gx, &gy, &gz, &t);
-
-        printf("ax: %.2f\tay: %.2f\taz: %.2f\n", ax, ay, az);
 
         // Jos laite on kallistettu positiiviseen x-akselin suuntaan --> tulostetaan piste
         if (ax > X_POS_THRESHOLD) {
@@ -65,18 +56,19 @@ static void sensor_task(void *arg){
         }
         // Jos laite on kallistettu postiivisen z-akselin suuntaan --> tulostetaan välilyönti
         else if (az > Z_POS_THRESHOLD) {
-            printf("\t");
+            printf(" ");
         }
-        // Jos laite on kallistettu negatiivisen z-akselin suuntaan --> lähetetään viesti
-        else if (az < Z_NEG_THRESHOLD) {
-            printf("\n");
+        // Jos laite on kallistettuna negatiiviseen z-akselin suuntaan --> tulostetaan kaksi välilyöntiä ja rivin vaihto.
+        else if (az > Z_NEG_THRESHOLD) {
+            printf("  \n");
         }
-        vTaskDelay(pdMS_TO_TICKS(500));
+
+        vTaskDelay(pdMS_TO_TICKS(1000)); //Tulostetaan kerran sekunnissa
     }
 }
 
 // =============================================
-// PRINT_TASK
+// PRINT_TASK (Sarjaliikenteen testaukseen)
 // =============================================
 static void print_task(void *arg){
     (void)arg;
@@ -96,7 +88,7 @@ int main() {
     stdio_init_all();       // Alustaa standarditulosteen
     init_hat_sdk();         // JTKJ Hat -lisäosat
     sleep_ms(3000);          // Pieni viive, jotta alustukset ehtivät valmistua
-    printf("Pico käynnistyi!\n");
+    printf("Pico käynnistyi!");
 
     // Määritellään tehtävien hallintakahvat
     TaskHandle_t hSensorTask, hPrintTask, hUSB = NULL;
