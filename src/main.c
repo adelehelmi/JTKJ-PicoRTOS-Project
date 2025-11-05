@@ -1,5 +1,5 @@
 
-// Koodi on tehty kokonaan yhdessä tasavertaisesti. Tekijät: Adele Wahlberg, Sini Korin ja Emilia Kamula
+// Koodi on tehty kokonaan yhdessä tasavertaisesti eli halutaan jakaa 6 pistettä tasan. Tekijät: Adele Wahlberg, Sini Korin ja Emilia Kamula
 
 #include <stdio.h>
 #include <string.h>
