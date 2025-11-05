@@ -1,4 +1,6 @@
 
+// Koodi on tehty kokonaan yhdessä tasavertaisesti. Tekijät: Adele Wahlberg, Sini Korin ja Emilia Kamula
+
 #include <stdio.h>
 #include <string.h>
 
@@ -16,9 +18,12 @@
 //Raja-arvot kallistukselle
 #define X_POS_THRESHOLD 0.7f
 #define X_NEG_THRESHOLD -0.7f
-#define Z_POS_THRESHOLD 0.7f
-#define Z_NEG_THRESHOLD -0.7f
+#define Z_POS_THRESHOLD 0.5f
 
+
+    // Tilakoneen määrittely
+    enum state { WAITING=1};
+    enum state programState = WAITING;
 
 // ==============================================
 // SENSOR_TASK
@@ -37,6 +42,7 @@ static void sensor_task(void *arg){
 
     // Luodaan muuttujat datan lukemista varten
     float ax, ay, az, gx, gy, gz, t;
+    sleep_ms(1000);
 
     // Pääsilmukka, joka lukee jatkuvasti IMU-anturin dataa
     // ja tulkitsee laitteen asennon akselien arvojen perusteella
@@ -45,6 +51,8 @@ static void sensor_task(void *arg){
         // Luetaan sensorin mittausdata: 
         // ax, ay, az = kiihtyvyydet (g) ja gx, gy, gz = kulmannopeudet (°/s), t = lämpötila
         ICM42670_read_sensor_data(&ax, &ay, &az, &gx, &gy, &gz, &t);
+
+        //printf("ax: %.2f\tay: %.2f\taz: %.2f\n", ax, ay, az);
 
         // Jos laite on kallistettu positiiviseen x-akselin suuntaan --> tulostetaan piste
         if (ax > X_POS_THRESHOLD) {
@@ -58,17 +66,13 @@ static void sensor_task(void *arg){
         else if (az > Z_POS_THRESHOLD) {
             printf(" ");
         }
-        // Jos laite on kallistettuna negatiiviseen z-akselin suuntaan --> tulostetaan kaksi välilyöntiä ja rivin vaihto.
-        else if (az > Z_NEG_THRESHOLD) {
-            printf("  \n");
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(1000)); //Tulostetaan kerran sekunnissa
+       
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
 // =============================================
-// PRINT_TASK (Sarjaliikenteen testaukseen)
+// PRINT_TASK
 // =============================================
 static void print_task(void *arg){
     (void)arg;
@@ -88,7 +92,7 @@ int main() {
     stdio_init_all();       // Alustaa standarditulosteen
     init_hat_sdk();         // JTKJ Hat -lisäosat
     sleep_ms(3000);          // Pieni viive, jotta alustukset ehtivät valmistua
-    printf("Pico käynnistyi!");
+    printf("Aloitetaan uusi viesti\n");
 
     // Määritellään tehtävien hallintakahvat
     TaskHandle_t hSensorTask, hPrintTask, hUSB = NULL;
