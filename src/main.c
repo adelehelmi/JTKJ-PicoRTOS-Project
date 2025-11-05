@@ -18,12 +18,10 @@
 //Raja-arvot kallistukselle
 #define X_POS_THRESHOLD 0.7f
 #define X_NEG_THRESHOLD -0.7f
-#define Z_POS_THRESHOLD 0.5f
+#define Z_POS_THRESHOLD 0.7f
+#define Z_NEG_THRESHOLD -0.7f
 
 
-    // Tilakoneen määrittely
-    enum state { WAITING=1};
-    enum state programState = WAITING;
 
 // ==============================================
 // SENSOR_TASK
@@ -42,7 +40,6 @@ static void sensor_task(void *arg){
 
     // Luodaan muuttujat datan lukemista varten
     float ax, ay, az, gx, gy, gz, t;
-    sleep_ms(1000);
 
     // Pääsilmukka, joka lukee jatkuvasti IMU-anturin dataa
     // ja tulkitsee laitteen asennon akselien arvojen perusteella
@@ -66,13 +63,16 @@ static void sensor_task(void *arg){
         else if (az > Z_POS_THRESHOLD) {
             printf(" ");
         }
-       
-        vTaskDelay(pdMS_TO_TICKS(500));
+        // Jos laite on kallistunut negatiivisen z-akselin suuntaan --> tulostetana kaksi välilyöntiä ja rivinvaihto.
+        else if (az > Z_NEG_THRESHOLD) {
+            printf("  \n");
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
 // =============================================
-// PRINT_TASK
+// PRINT_TASK (Testi)
 // =============================================
 static void print_task(void *arg){
     (void)arg;
